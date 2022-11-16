@@ -1,0 +1,206 @@
+import React, { useEffect, useState } from "react";
+import { Link, useParams, useHistory, useRouteMatch } from "react-router-dom";
+import { deleteCard, readDeck } from "../utils/api/index.js";
+import { deleteDeck } from "../utils/api/index.js";
+
+
+// Deck component route "/decks/:deck.id" linked by map in DeckList deck${id}
+// should 
+
+// create a function that retrieves an updated deck's id,
+// fetches it's card data, and sets the deck's useState to
+// contain it's content
+function Deck({ updateDecks }) {
+  // prop updateDecks function to setDeckLength in layout index, state is collection of decks
+
+
+  const [deck, setDeck] = useState([]);
+  // empty deck state to start
+  const { deckId } = useParams();
+  // route provided value of decks/:deckId
+  const history = useHistory();
+
+  const { url } = useRouteMatch();
+
+  const { id, name, description, cards } = deck;
+  // deconsruct state of deck object
+
+  useEffect(() => {
+  // resolve promise from API to provide deck object properties and values
+    const deckInfo = async () => {
+      const response = await readDeck(deckId);
+      setDeck(() => response);
+    };
+    deckInfo();
+  }, [deckId]);
+  // watch id from route, only re-render when id changes
+
+  
+  const deleteHandler = async () => {
+    // onClick event resolve promise from API to remove deck from data and remove from layout state
+    if ( 
+      window.confirm ( "Are you sure you want to delete this deck? You will not be able to recover it." )
+    ) {
+      await deleteDeck(id);
+      
+      updateDecks(-1);
+      // remove deck from layout deck collection
+      history.push("/");
+      // useNavigate
+    } else {
+      history.go(0);
+      // else not confirmed, stay in current state with currentDeck
+    }
+  };
+
+  // if there is no deck or no cards, return the following webpage
+  // that displays "loading..."
+
+  // conditional returns, first if no deck or no cards, return loading...
+  if (!deck || !cards) {
+    return (
+      <div className="spinner-border text-primary" role="status">
+        <span className="sr-only">Loading...</span>
+      </div>
+    );
+  } else {
+  // returns currentDeck data and all cards in the deck
+  // a navigation bar with link to "/" home component
+  // includes deck.name and deck.description and uses deck.id for routing
+  // link to "/decks/:deckid/edit for the EditDeck component
+  // link to "/decks/:deckid/study" for the Study component
+  // link to "/decks/:deckid/cards/new" for AddCard component
+  // button to delete the currentDeck
+  // query-able map of each card in the deck, could be own component
+  // for each display the front and back
+  // for each a link to "/decks/:deckid/cards/:cardid/edit" for EditCard component
+  // for each a button with inline onClick access to API promise to delete card
+    // and layout updateDecks to remove card from display
+    return (
+      <div className="col-9 mx-auto">
+
+        <nav aria-label="breadcrumb">
+          <ol className="breadcrumb">
+  
+            <li className="breadcrumb-item">
+              <Link to={"/"}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house-door" viewBox="0 0 20 20">
+                <path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4H2.5z"/>
+              </svg>
+                Home
+              </Link>
+            </li>
+            <li className="breadcrumb-item">{name}</li>
+          </ol>
+        </nav>
+
+        <div className="card border-0 mb-4">
+          <div className="card-body">
+            <div className="row px-3">
+              <h5 className="card-title">{name}</h5>
+            </div>
+            <p className="card-text">{description}</p>
+            <div className="row px-3">
+              <Link to={`/decks/${id}/edit`} className="btn btn-secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 20 20">
+                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+              </svg>
+                Edit
+              </Link>
+
+              <Link to={`/decks/${id}/study`} className="btn btn-primary ml-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-journal-bookmark" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6 8V1h1v6.117L8.743 6.07a.5.5 0 0 1 .514 0L11 7.117V1h1v7a.5.5 0 0 1-.757.429L9 7.083 6.757 8.43A.5.5 0 0 1 6 8z"/>
+                <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
+                <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
+              </svg>
+                Study
+              </Link>
+
+              <Link
+                to={`/decks/${id}/cards/new`} className="btn btn-primary ml-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 1 20 16">
+                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+                </svg>
+                Add Cards
+              </Link>
+
+              <button
+                onClick={deleteHandler}
+                name="delete"
+                value={id}
+                className="btn btn-danger ml-auto"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                </svg>
+   
+                <i className="fa fa-trash" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="row pl-3 pb-2">
+          <h1>Cards</h1>
+        </div>
+
+        {cards.map((card, index) => (
+          <div className="row" key={index}>
+            <div className="col">
+              <div className="card">
+                <div className="row card-body">
+                  <p className="col-6 card-text">{card.front}</p>
+                  <p className="col-6 card-text">{card.back}</p>
+                </div>
+
+                <div className="d-flex justify-content-end p-2">
+                  <Link
+                    to={`${url}/cards/${card.id}/edit`}
+                    className="btn btn-secondary"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 20 20">
+                      <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                    </svg>
+                    Edit
+                  </Link>
+
+                  <button
+                    onClick={async () => {
+                      if (
+                        window.confirm(
+                          "Are you sure you want to delete this card? You will not be able to recover it."
+                        )
+                      ) {
+                        await deleteCard(card.id);
+                        updateDecks(-1);
+                        history.go(0);
+                      } else {
+                        history.go(0);
+                      }
+                    }}
+                    name="deleteCard"
+                    value={card.id}
+                    className="btn btn-danger ml-2"
+                  >
+
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                      <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                    </svg>
+          
+                    <i className="fa fa-trash" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+}
+
+export default Deck;
+
